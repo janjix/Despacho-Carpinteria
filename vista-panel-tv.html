@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TECC Despacho · panel de taller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --e:1;
+  --fondo:#101318; --sup:#1B1F26; --borde:#2E343E;
+  --texto:#F2F3F5; --tenue:rgba(255,255,255,.45);
+  --pendiente:#9AA0AA; --embalado:#E8A400; --cargado:#1E8E4E; --alerta:#C42B2B;
+}
+*{box-sizing:border-box}
+/* El fondo va en html y en body: si vive solo en el contenedor, cualquier
+   hueco por debajo deja ver el blanco del documento. */
+html,body{height:100%;min-height:100vh;background:var(--fondo)}
+body{
+  margin:0; color:var(--texto);
+  font:400 16px/1.4 Inter,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+  overflow:hidden; overscroll-behavior:none;
+}
+.disp{font-family:Archivo,sans-serif}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+.pantalla{min-height:100vh;height:100dvh;background:var(--fondo);display:flex;flex-direction:column;
+  padding:calc(1.6rem * var(--e)) calc(2.2rem * var(--e))}
+
+header{display:flex;align-items:center;gap:calc(2rem * var(--e));flex-shrink:0}
+h1{font-family:Archivo;font-weight:800;line-height:1;margin:0;
+   font-size:calc(3.4rem * var(--e));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{color:var(--tenue);margin:calc(.5rem * var(--e)) 0 0;font-size:calc(1.15rem * var(--e));
+     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cifras{display:flex;align-items:flex-end;gap:calc(2.6rem * var(--e));flex-shrink:0}
+.cifra{text-align:center}
+.cifra .n{font-family:Archivo;font-weight:800;line-height:1;font-size:calc(5.2rem * var(--e));
+          font-variant-numeric:tabular-nums}
+.cifra .e{font-family:Archivo;text-transform:uppercase;letter-spacing:.16em;
+          color:var(--tenue);margin-top:calc(.25rem * var(--e));font-size:calc(.95rem * var(--e))}
+
+.avance{display:flex;height:calc(1.1rem * var(--e));margin-top:calc(1.1rem * var(--e));
+        background:var(--sup);overflow:hidden;flex-shrink:0}
+.alerta{flex-shrink:0;background:var(--alerta);color:#fff;font-family:Archivo;font-weight:700;
+        text-transform:uppercase;letter-spacing:.03em;margin-top:calc(1rem * var(--e));
+        padding:calc(.7rem * var(--e)) calc(1.2rem * var(--e));font-size:calc(1.6rem * var(--e))}
+
+main{flex:1;min-height:0;margin-top:calc(1.4rem * var(--e))}
+.rejilla{display:grid;gap:calc(.6rem * var(--e));
+         grid-template-columns:repeat(auto-fill,minmax(calc(17rem * var(--e)),1fr))}
+body.vertical .rejilla{grid-template-columns:repeat(auto-fill,minmax(calc(22rem * var(--e)),1fr))}
+body.vertical header{flex-direction:column;align-items:stretch;gap:calc(1rem * var(--e))}
+body.vertical .cifras{justify-content:space-between;gap:calc(1.2rem * var(--e))}
+body.vertical footer{flex-direction:column;align-items:flex-start}
+body.vertical .pantalla{padding:calc(1.4rem * var(--e)) calc(1.2rem * var(--e))}
+.t{display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+   padding:calc(.85rem * var(--e)) calc(1rem * var(--e));min-height:calc(8.2rem * var(--e))}
+.t .n{font-family:Archivo;font-weight:700;line-height:1.1;font-size:calc(1.85rem * var(--e));display:block}
+.t .area{font-family:Archivo;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+         opacity:.7;font-size:calc(.95rem * var(--e));display:block;margin-top:calc(.25rem * var(--e))}
+.t .pie{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;
+        margin-top:calc(.6rem * var(--e))}
+.t .est{font-family:Archivo;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+        opacity:.8;font-size:calc(.95rem * var(--e))}
+.t .cod{opacity:.75;font-size:calc(.95rem * var(--e))}
+.t .barritas{display:flex;gap:2px;height:calc(.4rem * var(--e));margin-top:calc(.5rem * var(--e))}
+.t .barritas span{flex:1}
+
+.t-pen{background:var(--sup);color:#C7CAD1;border:2px solid var(--borde)}
+.t-emb{background:var(--embalado);color:#2E2200}
+.t-car{background:var(--cargado);color:#fff}
+
+footer{flex-shrink:0;display:flex;flex-wrap:wrap;align-items:center;gap:calc(2rem * var(--e)) ;
+       border-top:1px solid rgba(255,255,255,.1);margin-top:calc(1.2rem * var(--e));
+       padding-top:calc(.9rem * var(--e));font-size:calc(1.1rem * var(--e))}
+footer .lbl{color:rgba(255,255,255,.4);font-family:Archivo;text-transform:uppercase;
+            letter-spacing:.16em;font-size:calc(.85rem * var(--e))}
+.puntos{display:flex;align-items:center;gap:calc(.5rem * var(--e));margin-left:auto}
+.puntos i{display:block;border-radius:99px;width:calc(.55rem * var(--e));height:calc(.55rem * var(--e));
+          background:rgba(255,255,255,.22)}
+.puntos i.on{background:var(--texto)}
+
+.controles{position:fixed;top:0;right:0;bottom:0;z-index:50;background:rgba(10,12,15,.98);
+           width:min(360px,92vw);border-left:1px solid rgba(255,255,255,.15);
+           transform:translateX(100%);transition:transform .2s;overflow-y:auto}
+.controles.ver{transform:translateX(0)}
+.controles .in{display:flex;flex-direction:column;gap:16px;padding:20px;font-size:14px}
+.controles .grupo>span{display:block;margin-bottom:8px}
+.controles .fila{display:grid;gap:8px}
+.controles .fila.c4{grid-template-columns:repeat(4,1fr)}
+.controles .fila.c2{grid-template-columns:repeat(2,1fr)}
+#abrir{position:fixed;top:12px;right:12px;z-index:49;background:rgba(10,12,15,.75)}
+#velo{position:fixed;inset:0;z-index:48;background:rgba(0,0,0,.45);display:none}
+#velo.ver{display:block}
+.controles .grupo{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.6)}
+.controles .grupo>span{font-family:Archivo;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+button{font:inherit;cursor:pointer;min-height:44px;padding:0 14px;background:transparent;
+       border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.75);
+       font-family:Archivo;text-transform:uppercase;letter-spacing:.06em;font-size:13px}
+button:hover{color:#fff;border-color:rgba(255,255,255,.6)}
+button.on{background:#fff;color:#101318;border-color:#fff}
+.derecha{margin-left:auto}
+.regla{position:fixed;bottom:8px;left:12px;color:rgba(255,255,255,.25);font-size:11px;z-index:40}
+</style>
+</head>
+<body>
+
+<button id="abrir">Ajustes</button>
+<div id="velo"></div>
+<div class="controles" id="controles"><div class="in">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span class="disp" style="text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.45);font-size:12px">Ajustes del panel</span>
+    <button id="cerrar" style="border:0;font-size:22px;padding:0 8px">×</button>
+  </div>
+  <div class="grupo"><span style="font-family:Archivo;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:rgba(255,255,255,.5)">Tamaño de letra</span>
+    <div class="fila c4">
+      <button data-e="0.8">S</button><button data-e="1" class="on">M</button>
+      <button data-e="1.25">L</button><button data-e="1.5">XL</button>
+    </div>
+  </div>
+  <div class="grupo"><span style="font-family:Archivo;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:rgba(255,255,255,.5)">Tarjetas por pantalla</span>
+    <div class="fila c4">
+      <button data-n="12">12</button><button data-n="20" class="on">20</button>
+      <button data-n="30">30</button><button data-n="42">42</button>
+    </div>
+  </div>
+  <div class="grupo"><span style="font-family:Archivo;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:rgba(255,255,255,.5)">Orientación</span>
+    <div class="fila c2">
+      <button data-v="0" class="on">Horizontal</button><button data-v="1">Vertical</button>
+    </div>
+  </div>
+  <button id="filtro">Ver solo lo que falta</button>
+  <button id="despachados" class="on">Ocultando lo despachado</button>
+  <button id="simular">Simular escaneos</button>
+  <button id="fs">Pantalla completa</button>
+</div></div>
+
+<div class="pantalla">
+  <header>
+    <div style="min-width:0;flex:1">
+      <h1 id="titulo">Casa Montaña 12</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="cifras" id="cifras"></div>
+  </header>
+
+  <div class="avance" id="avance"></div>
+  <div class="alerta" id="alerta" style="display:none"></div>
+
+  <main><div class="rejilla" id="rejilla"></div></main>
+
+  <footer>
+    <span class="lbl">Último</span>
+    <span id="ultimo" style="color:rgba(255,255,255,.35)">Sin movimientos todavía</span>
+    <span id="camion" style="color:rgba(255,255,255,.6)"></span>
+    <span class="puntos" id="puntos"></span>
+    <span class="mono" id="reloj" style="color:rgba(255,255,255,.5)"></span>
+  </footer>
+</div>
+
+<div class="regla">Vista previa. Mueve el ratón para ver los controles. Párate donde va a estar el operario y elige el tamaño desde ahí.</div>
+
+<script>
+// ---- datos de ejemplo, tomados de un listado real ----
+const NOMBRES = ['CURVA TV IZQ','ZAPATERA 9','MUEBLE ACCESO','LISTON ZAPATERA IZQ','VITRINA 2',
+'ZAPATERA 7','CRUDO ESPEJO 2','NICHO TV REPISA IZQ','LATERAL IZQ VANITY','NICHO BASE TV',
+'MODULO REPISA 1','VANITY','LATERALES ISLA','VITRINA 4','VITRINA 3','MODULO 4','MODULO 3',
+'CRUDO ESPEJO 3','ZAPATERA 2','ZAPATERA 1','CRUDO ESPEJO4','TORRE LATERAL ZAPATERA 2','PUERTA',
+'TORRE LATERAL ZAPATERA','LISTON ZAPATERA 7','CURVA TV DER','MODULO 7','NICHO REPISA','ZAPATERA 3',
+'MODULO 6','MODULO 2','VITRINA 1','LATERAL DER VANITY','ZAPATERA 8','MODULO NEVERA',
+'NICHO TV REPISA DER','CRUDO BASE TV','SUPERIOR TV','TRASERA TV','LISTON ZAPATERA DER','MODULO 8',
+'LISTON PUERTA','ISLA 2','TORRE LATERAL MODULO 1','MODULO 5','MODULO 1','ZAPATERA 4',
+'MODULO REPISA 2','CRUDO ESPEJO1','ISLA 1','ZAPATERA 5','ZAPATERA10','TORRE LATERAL MODULO 8',
+'NICHO REPISA 3','ZAPATERA 6'];
+
+const AREAS = ['Vestier principal','Cocina','Baño'];
+let grupos = NOMBRES.map((n,i)=>{
+  const bultos = (i%9===0) ? 3 : (i%5===0 ? 2 : 1);
+  const r = Math.random();
+  const est = r<0.34 ? 'cargado' : r<0.66 ? 'embalado' : 'pendiente';
+  return {
+    id:i, nombre:n, area:AREAS[i%3],
+    codigo:'TECC-CASAM-VES-'+String(i+1).padStart(3,'0'),
+    items:Array.from({length:bultos},(_,k)=>({
+      estado: bultos>1 && k>0 && Math.random()<0.4 ? 'embalado' : est
+    }))
+  };
+});
+
+const ESTADO = {pendiente:'Pendiente', embalado:'Embalado', cargado:'Cargado'};
+const CLASE  = {pendiente:'t-pen', embalado:'t-emb', cargado:'t-car'};
+const estadoGrupo = g => g.items.every(i=>i.estado==='cargado') ? 'cargado'
+  : g.items.every(i=>i.estado!=='pendiente') ? 'embalado' : 'pendiente';
+
+let escala=1, porPagina=20, soloFalta=false, vertical=false, pagina=0, timer=null, ultimo=null;
+// Seguidilla por área: los grupos de un área salen juntos
+grupos.sort((a,b)=>AREAS.indexOf(a.area)-AREAS.indexOf(b.area));
+
+let ocultarDesp = true;
+function resumen(){
+  const r={total:0,pendiente:0,embalado:0,cargado:0};
+  grupos.filter(g=>!(ocultarDesp&&g.despachado))
+    .forEach(g=>g.items.forEach(i=>{r.total++;r[i.estado]++}));
+  return r;
+}
+
+function pintar(){
+  const r = resumen();
+  document.getElementById('cifras').innerHTML = [
+    ['Pendientes', r.pendiente, 'var(--pendiente)'],
+    ['Embalados', r.embalado, 'var(--embalado)'],
+    ['Cargados', r.cargado, 'var(--cargado)'],
+    ['Bultos', r.total, '#fff']
+  ].map(([e,n,c])=>`<div class="cifra"><div class="n" style="color:${c}">${n}</div><div class="e">${e}</div></div>`).join('');
+
+  document.getElementById('avance').innerHTML =
+    `<div style="width:${r.cargado/r.total*100}%;background:var(--cargado)"></div>
+     <div style="width:${r.embalado/r.total*100}%;background:var(--embalado)"></div>`;
+
+  const al = document.getElementById('alerta');
+  if (r.embalado > 0) { al.style.display=''; al.textContent = `Sale hoy · quedan ${r.embalado} bultos embalados sin cargar`; }
+  else al.style.display='none';
+
+  let visibles = ocultarDesp ? grupos.filter(g=>!g.despachado) : grupos;
+  if (soloFalta) visibles = visibles.filter(g=>estadoGrupo(g)!=='cargado');
+  const paginas = [];
+  for (let i=0;i<visibles.length;i+=porPagina) paginas.push(visibles.slice(i,i+porPagina));
+  if (!paginas.length) paginas.push([]);
+  if (pagina >= paginas.length) pagina = 0;
+  const actual = paginas[pagina];
+
+  const areas = [...new Set(actual.map(g=>g.area))];
+  document.getElementById('sub').textContent =
+    'MS Arquitectura · Despacho 07 ago 2026' + (areas.length ? ' · ' + areas.join(' · ') : '');
+
+  document.getElementById('rejilla').innerHTML = actual.map(g=>{
+    const est = estadoGrupo(g);
+    const car = g.items.filter(i=>i.estado==='cargado').length;
+    const barritas = g.items.length>1 && est!=='cargado'
+      ? `<div class="barritas">${g.items.map(i=>`<span style="background:${
+          i.estado==='cargado'?'#0E4B29':i.estado==='embalado'?'rgba(0,0,0,.35)':'rgba(255,255,255,.18)'}"></span>`).join('')}</div>`
+      : '';
+    return `<div class="t ${CLASE[est]}">
+      <div><span class="n">${g.nombre}</span><span class="area">${g.area}</span></div>
+      <div class="pie"><span class="est">${ESTADO[est]}</span>
+        <span class="cod mono">${g.items.length>1 ? car+'/'+g.items.length : g.codigo.split('-').pop()}</span></div>
+      ${barritas}</div>`;
+  }).join('');
+
+  document.getElementById('puntos').innerHTML = paginas.length>1
+    ? paginas.map((_,i)=>`<i class="${i===pagina?'on':''}"></i>`).join('') +
+      `<span style="color:rgba(255,255,255,.4);margin-left:8px;font-size:calc(.9rem * var(--e))">${pagina+1}/${paginas.length}</span>`
+    : '';
+
+  clearInterval(timer);
+  if (paginas.length>1) timer = setInterval(()=>{ pagina=(pagina+1)%paginas.length; pintar(); }, 12000);
+}
+
+// ---- controles ----
+document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-e]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); escala=parseFloat(b.dataset.e);
+  document.documentElement.style.setProperty('--e', escala); pintar();
+});
+document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-n]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); porPagina=parseInt(b.dataset.n); pagina=0; pintar();
+});
+document.getElementById('filtro').onclick=(e)=>{
+  soloFalta=!soloFalta; e.target.classList.toggle('on', soloFalta);
+  e.target.textContent = soloFalta ? 'Viendo lo que falta' : 'Ver solo lo que falta';
+  pagina=0; pintar();
+};
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-v]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); vertical = b.dataset.v==='1';
+  document.body.classList.toggle('vertical', vertical); pagina=0; pintar();
+});
+document.getElementById('despachados').onclick=(e)=>{
+  ocultarDesp=!ocultarDesp; e.target.classList.toggle('on', ocultarDesp);
+  e.target.textContent = ocultarDesp ? 'Ocultando lo despachado' : 'Mostrar todo';
+  pagina=0; pintar();
+};
+document.getElementById('fs').onclick=()=>{
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
+};
+const ctrl2=document.getElementById('controles'), velo=document.getElementById('velo');
+const abrirCtrl=(v)=>{ ctrl2.classList.toggle('ver',v); velo.classList.toggle('ver',v);
+  document.getElementById('abrir').style.opacity = v?'0':'1'; };
+document.getElementById('abrir').onclick=()=>abrirCtrl(true);
+document.getElementById('cerrar').onclick=()=>abrirCtrl(false);
+velo.onclick=()=>abrirCtrl(false);
+
+// Simulación de escaneos, para ver el panel moverse solo
+let simulando = null;
+document.getElementById('simular').onclick=(e)=>{
+  if (simulando) { clearInterval(simulando); simulando=null; e.target.classList.remove('on'); return; }
+  e.target.classList.add('on');
+  simulando = setInterval(()=>{
+    const candidatos = grupos.flatMap(g=>g.items.map(i=>({g,i}))).filter(x=>x.i.estado!=='cargado');
+    if (!candidatos.length) return;
+    const x = candidatos[Math.floor(Math.random()*candidatos.length)];
+    x.i.estado = x.i.estado==='pendiente' ? 'embalado' : 'cargado';
+    ultimo = { codigo:x.g.codigo, titulo:x.i.estado==='embalado'?'Embalado':'Cargado' };
+    document.getElementById('ultimo').innerHTML =
+      `<span class="mono">${ultimo.codigo}</span><span style="color:rgba(255,255,255,.5)"> · ${ultimo.titulo} · ${new Date().toLocaleTimeString('es-VE',{hour12:false})}</span>`;
+    document.getElementById('ultimo').style.color='';
+    document.getElementById('camion').innerHTML = 'Cargando en <strong style="color:#fff">CAM-01</strong> · V-260807-001';
+    pintar();
+  }, 1800);
+};
+
+// Marca como despachados los grupos ya cargados, para ver el panel vaciarse
+setTimeout(()=>{
+  const btn = document.createElement('button');
+  btn.textContent = 'Despachar camión';
+  btn.onclick = ()=>{
+    grupos.filter(g=>estadoGrupo(g)==='cargado').forEach(g=>g.despachado=true);
+    pagina=0; pintar();
+  };
+  document.querySelector('.controles .in').insertBefore(btn, document.getElementById('simular'));
+}, 0);
+
+setInterval(()=>{
+  document.getElementById('reloj').textContent = new Date().toLocaleTimeString('es-VE',{hour12:false});
+}, 1000);
+
+pintar();
+</script>
+</body>
+</html>
