@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F5F4F1" />
+    <link rel="icon" href="data:image/svg%2Bxml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316181C'/%3E%3Cg fill='%23F5F4F1'%3E%3Crect x='5' y='8' width='2' height='16'/%3E%3Crect x='9' y='8' width='1' height='16'/%3E%3Crect x='12' y='8' width='3' height='16'/%3E%3Crect x='17' y='8' width='1' height='16'/%3E%3Crect x='20' y='8' width='2' height='16'/%3E%3Crect x='24' y='8' width='3' height='16'/%3E%3C/g%3E%3C/svg%3E" />
+    <title>TECC Despacho</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Red de seguridad para el televisor.
+         Si el JavaScript revienta antes de dibujar nada (navegador viejo,
+         archivo que no cargó, error de arranque), la pantalla queda en blanco
+         y no hay forma de saber qué pasó sin conectar un teclado y abrir la
+         consola. Esto muestra el error en la propia pantalla. -->
+    <div id="arranque-fallido" style="display:none;position:fixed;inset:0;z-index:9999;
+         background:#101318;color:#F2F3F5;padding:6vw;font:16px/1.5 system-ui,sans-serif">
+      <h1 style="font-size:6vw;margin:0 0 3vh;font-weight:800">La app no pudo arrancar</h1>
+      <p style="font-size:2.6vw;margin:0 0 2vh;color:#9AA0AA">
+        Si este equipo tiene un navegador antiguo, prueba a actualizar Chrome
+        desde la tienda de aplicaciones. El detalle técnico:
+      </p>
+      <pre id="arranque-detalle" style="font-size:2.2vw;white-space:pre-wrap;
+           background:#1B1F26;padding:2vh;margin:0;overflow:auto;max-height:40vh"></pre>
+      <p id="arranque-navegador" style="font-size:2.2vw;color:#6E6A63;margin-top:3vh"></p>
+    </div>
+
+    <script>
+      (function () {
+        var mostrado = false
+        function mostrar(texto) {
+          if (mostrado) return
+          mostrado = true
+          var caja = document.getElementById('arranque-fallido')
+          if (!caja) return
+          caja.style.display = 'block'
+          document.getElementById('arranque-detalle').textContent = texto
+          document.getElementById('arranque-navegador').textContent = navigator.userAgent
+        }
+        window.addEventListener('error', function (e) {
+          mostrar((e.message || 'Error') + (e.filename ? '\n' + e.filename + ':' + e.lineno : ''))
+        })
+        window.addEventListener('unhandledrejection', function (e) {
+          mostrar('Promesa rechazada: ' + (e.reason && e.reason.message ? e.reason.message : e.reason))
+        })
+        // Si a los ocho segundos React no ha pintado nada, algo falló en silencio
+        setTimeout(function () {
+          var raiz = document.getElementById('root')
+          if (raiz && raiz.childNodes.length === 0) {
+            mostrar('La aplicación no dibujó nada en ocho segundos.\n' +
+                    'Suele ser un navegador demasiado antiguo o un archivo que no cargó.')
+          }
+        }, 8000)
+      })()
+    </script>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
